@@ -19,7 +19,7 @@ describe('PlatformRepository', () => {
     rootRepository = module.get<Repository<Platform>>(getRepositoryToken(Platform));
   });
 
-  describe('getAllPlatforms', () => {
+  describe('getPlatforms', () => {
     beforeAll(async () => {
       const testPlatforms = [
         Platform.from({
@@ -53,7 +53,7 @@ describe('PlatformRepository', () => {
     });
 
     it('ACTIVATED인 플랫폼만 가져온다.', async () => {
-      const platforms = await repository.getAllPlatforms();
+      const platforms = await repository.getPlatforms();
       expect(platforms).toEqual(
         expect.arrayContaining([expect.objectContaining({ status: PlatformStatus.Activated })]),
       );

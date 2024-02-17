@@ -20,4 +20,8 @@ export class PlatformRepository {
     const queryBuilder = this.createQueryBuilder().where('status = :status', { status: PlatformStatus.Activated });
     return queryBuilder.getMany();
   }
+
+  async getPlatformsUsingTypeORMFunction(): Promise<Platform[]> {
+    return this.repository.find({ where: { status: PlatformStatus.Activated } });
+  }
 }

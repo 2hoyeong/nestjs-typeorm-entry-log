@@ -42,11 +42,6 @@ export class EntryPointLoggingModule implements OnModuleInit {
     return (methodName: string) => {
       const methodRef = instance[methodName];
 
-      // const metadata = this.reflector.get(ADD_ENTRY_POINT_COMMENT, instance[methodName]);
-      // if (!metadata) {
-      //   return;
-      // }
-
       const originalMethod = methodRef;
 
       if (methodRef.constructor.name === 'AsyncFunction') {
@@ -67,10 +62,28 @@ export class EntryPointLoggingModule implements OnModuleInit {
     const projectName = this.configService.get('app.projectName');
     return new Proxy(thisArg, {
       get: function (target, propKey, receiver) {
+        const origin = target[propKey];
         if (propKey === 'createQueryBuilder') {
-          const origin = target[propKey];
           const entrypoint = `${projectName}.${targetName}.${propertyKey}`;
           return (...args: any[]) => origin.call(target, ...args).comment(entrypoint);
+        }
+
+        if (origin instanceof Repository) {
+          const entrypoint = `${projectName}.${targetName}.${propertyKey}`;
+          return new Proxy(origin, {
+            get: function (target, propKey, receiver) {
+              if (target[propKey] instanceof Function) {
+                return (firstArg: any, ...args: any[]) => {
+                  if (firstArg && firstArg instanceof Object && firstArg.where && !firstArg.comment) {
+                    firstArg.comment = entrypoint;
+                  }
+                  return Reflect.get(target, propKey, receiver).call(target, ...[firstArg, ...args]);
+                };
+              }
+
+              return Reflect.get(target, propKey, receiver);
+            },
+          });
         }
         return Reflect.get(target, propKey, receiver);
       },

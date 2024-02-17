@@ -3,15 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Platform } from '../../common/entities/platform/platform.entity';
 import { PlatformStatus } from '../../common/entities/platform/platform.constant';
-import { ConfigService } from '@nestjs/config';
 import { AddEntryPointComment } from '../../libs/typeorm/utils';
 
 @Injectable()
 export class PlatformRepository {
-  constructor(
-    @InjectRepository(Platform) private readonly repository: Repository<Platform>,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(@InjectRepository(Platform) private readonly repository: Repository<Platform>) {}
 
   createQueryBuilder(alias = 'platform'): SelectQueryBuilder<Platform> {
     return this.repository.createQueryBuilder(alias);

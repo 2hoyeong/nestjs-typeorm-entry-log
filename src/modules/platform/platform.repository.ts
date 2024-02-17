@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Platform } from '../../common/entities/platform/platform.entity';
 import { PlatformStatus } from '../../common/entities/platform/platform.constant';
-import { AddEntryPointComment } from '../../libs/typeorm/utils';
 
 @Injectable()
 export class PlatformRepository {
@@ -17,7 +16,6 @@ export class PlatformRepository {
     return this.repository.save(platform);
   }
 
-  @AddEntryPointComment()
   async getPlatforms(): Promise<Platform[]> {
     const queryBuilder = this.createQueryBuilder().where('status = :status', { status: PlatformStatus.Activated });
     return queryBuilder.getMany();

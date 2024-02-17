@@ -1,6 +1,5 @@
 import { DiscoveryModule, DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { DynamicModule, Module, OnModuleInit } from '@nestjs/common';
-import { ADD_ENTRY_POINT_COMMENT } from './utils';
 import { NestConfigModule } from '../../common/config/config.module';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -23,11 +22,17 @@ export class EntryPointLoggingModule implements OnModuleInit {
     };
   }
 
+  isRepository(instance: any) {
+    // return instance.constructor.name.endsWith('Repository');
+    return Object.getOwnPropertyNames(instance).some((prop) => instance[prop] instanceof Repository);
+  }
+
   onModuleInit() {
     this.discovery
       .getProviders()
       .filter((wrapper) => wrapper.isDependencyTreeStatic())
       .filter(({ instance }) => instance && Object.getPrototypeOf(instance))
+      .filter(({ instance }) => this.isRepository(instance))
       .forEach(({ instance }) => {
         this.scanner.getAllMethodNames(Object.getPrototypeOf(instance)).forEach(this.addEntryPointAtComment(instance));
       });
@@ -37,10 +42,10 @@ export class EntryPointLoggingModule implements OnModuleInit {
     return (methodName: string) => {
       const methodRef = instance[methodName];
 
-      const metadata = this.reflector.get(ADD_ENTRY_POINT_COMMENT, instance[methodName]);
-      if (!metadata) {
-        return;
-      }
+      // const metadata = this.reflector.get(ADD_ENTRY_POINT_COMMENT, instance[methodName]);
+      // if (!metadata) {
+      //   return;
+      // }
 
       const originalMethod = methodRef;
 
